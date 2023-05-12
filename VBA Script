@@ -1,0 +1,181 @@
+Sub Multi_Year_Stock_Data()
+
+    For Each ws In Worksheets
+        
+        'Define All Variables in the Order They Appear
+        
+        'Current Worksheet
+        Dim Work_Sheet As String
+        
+        'Last Row Column A
+        Dim LastRowA As Long
+        
+        'Starting Row of Ticker
+        Dim y As Long
+        
+        'Ticker Row Counter
+        Dim Ticker_Count As Long
+        
+        'Current row
+        Dim x As Long
+
+        'Percentage Change Calculation
+        Dim Percent_Change As Double
+        
+        'last Row Column I
+        Dim LastRowI As Long
+        
+        'Greatest Total Volume
+        Dim Greateast_Volume As Double
+
+        'Greatest % Increase Calculation
+        Dim Greatest_Increase As Double
+
+        'Greatest % Decrease Calculation
+        Dim Greatest_Decrease As Double
+        
+        'Create New Headers Within each Worksheet
+        ws.Cells(1, 9).Value = ("Ticker")
+        ws.Cells(1, 10).Value = ("Yearly Change")
+        ws.Cells(1, 11).Value = ("Percent Change")
+        ws.Cells(1, 12).Value = ("Total Stock Volume")
+        ws.Cells(1, 16).Value = ("Ticker")
+        ws.Cells(1, 17).Value = ("Value")
+        ws.Cells(2, 15).Value = ("Greatest % Increase")
+        ws.Cells(3, 15).Value = ("Greatest % Decrease")
+        ws.Cells(4, 15).Value = ("Greatest Total Volume")
+        
+        'Get the Name of the Worksheet
+        Work_Sheet = ws.Name
+        
+        'Find The Last Valued Cell in Column A
+        LastRowA = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        
+        'Set the Starting Row for the Ticker
+        y = 2
+    
+        'Set Ticker Counter to Start in the First Row
+        Ticker_Count = 2
+        
+            'Ensure all Rows of Data are being looped through
+            For x = 2 To LastRowA
+        
+                'Check if the Value in the Ticker Column has Changed
+                If ws.Cells(x + 1, 1).Value <> ws.Cells(x, 1).Value Then
+            
+                'If the Value has Changed then Write the Ticker in it's new Column
+                ws.Cells(Ticker_Count, 9).Value = ws.Cells(x, 1).Value
+                
+                'Also Calculate and Display the Value for Yearly Change in it's new Column
+                ws.Cells(Ticker_Count, 10).Value = ws.Cells(x, 6).Value - ws.Cells(y, 3).Value
+                
+                    'Apply Conditional Formatting to Positive/Negative Values in Yearly Change
+                    If ws.Cells(Ticker_Count, 10).Value > 0 Then
+                    
+                    'If Positive Set Cell Colour to be Green
+                    ws.Cells(Ticker_Count, 10).Interior.ColorIndex = 4
+                    
+                    Else
+                    
+                    'If Negative Set Cell Colour to be Red
+                    ws.Cells(Ticker_Count, 10).Interior.ColorIndex = 3
+                    
+                    End If
+                    
+                        'Calculate and Display Percent Change in its new Column
+                        If ws.Cells(y, 3).Value <> 0 Then
+                        Percent_Change = ((ws.Cells(x, 6).Value - ws.Cells(y, 3).Value) / ws.Cells(y, 3).Value)
+                        
+                        'Format Value Into a Percentage
+                        ws.Cells(Ticker_Count, 11).Value = Format(Percent_Change, "Percent")
+                        
+                        End If
+                    
+                            'Repeat Conditional Formatting for Positive/Negative Values in Percent Change
+                            If ws.Cells(Ticker_Count, 11).Value > 0 Then
+                    
+                            'If Positive Set Cell Colour to be Green
+                            ws.Cells(Ticker_Count, 11).Interior.ColorIndex = 4
+                    
+                            Else
+                    
+                            'If Negative Set Cell Colour to be Red
+                            ws.Cells(Ticker_Count, 11).Interior.ColorIndex = 3
+                    
+                            End If
+                          
+                'Calculate and Display Total Volume in it's new Column
+                ws.Cells(Ticker_Count, 12).Value = WorksheetFunction.Sum(Range(ws.Cells(y, 7), ws.Cells(x, 7)))
+                
+                'Set a new Starting Row for the Ticker
+                y = x + 1
+                
+                'Increase Ticker Count by 1
+                Ticker_Count = Ticker_Count + 1
+                
+                End If
+            
+            'Move to the next row and repeat the process
+            Next x
+            
+        'Find The Last Valued Cell in Column I
+        LastRowI = ws.Cells(Rows.Count, 9).End(xlUp).Row
+        
+        'Define the Starting Point of the Data for each Calculation
+        Greatest_Volume = ws.Cells(2, 12).Value
+        Greatest_Increase = ws.Cells(2, 11).Value
+        Greatest_Decrease = ws.Cells(2, 11).Value
+        
+            'Ensure all Rows of Data are being looped through
+            For x = 2 To LastRowI
+                
+                'Calculate the Greatest Total Volume
+                If ws.Cells(x, 12).Value > Greatest_Volume Then
+                Greatest_Volume = ws.Cells(x, 12).Value
+                ws.Cells(4, 16).Value = ws.Cells(x, 9).Value
+                
+                Else
+                
+                Greatest_Volume = Greatest_Volume
+                
+                End If
+                
+                'Display Greatest Total Volume in Proper Format
+                ws.Cells(4, 17).Value = Format(Greatest_Volume, "Scientific")
+                
+                    'Calculate Greatest % Increase
+                    If ws.Cells(x, 11).Value > Greatest_Increase Then
+                    Greatest_Increase = ws.Cells(x, 11).Value
+                    ws.Cells(2, 16).Value = ws.Cells(x, 9).Value
+                    
+                    Else
+                    
+                    Greatest_Increase = Greatest_Increase
+                    
+                    End If
+                    
+                    'Display Greatest % Increase in Proper Format
+                    ws.Cells(2, 17).Value = Format(Greatest_Increase, "Percent")
+                    
+                        'Calculate Greatest % Decrease
+                        If ws.Cells(x, 11).Value < Greatest_Decrease Then
+                        Greatest_Decrease = ws.Cells(x, 11).Value
+                        ws.Cells(3, 16).Value = ws.Cells(x, 9).Value
+                        
+                        Else
+                        
+                        Greatest_Decrease = Greatest_Decrease
+                        
+                        End If
+                        
+                        'Display Greatest % Decrease in Proper Format
+                        ws.Cells(3, 17).Value = Format(Greatest_Decrease, "Percent")
+                        
+            Next x
+            
+        'Automatically Adjust Columns to fit
+        Worksheets(Work_Sheet).Columns("A:AB").AutoFit
+        
+    Next ws
+        
+End Sub
